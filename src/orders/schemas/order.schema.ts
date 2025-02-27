@@ -1,12 +1,3 @@
-/**
-Reasons:
-
-Atomic Operations: Cart operations (add/remove items) can be done in a single operation
-Read Performance: You'll typically need to read the entire cart at once
-Data Consistency: Cart items are strongly related to the cart itself
-Query Simplicity: No need for joins/lookups
-*/
-
 import { ApiProperty } from '@nestjs/swagger';
 
 class OrderItems {

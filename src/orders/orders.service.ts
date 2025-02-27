@@ -14,7 +14,7 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 export class OrdersService {
   private ordersDatabase: Order[];
 
-  constructor(private readonly itemsService: ProductsService) {
+  constructor(private readonly productsService: ProductsService) {
     this.ordersDatabase = [];
   }
 
@@ -49,7 +49,7 @@ export class OrdersService {
 
     // Check if product_id exist
     for (const item of mergeItems) {
-      const check = await this.itemsService.findOne(item.product_id);
+      const check = await this.productsService.findOne(item.product_id);
       if (!check) {
         throw new BadRequestException(`Product ${item.product_id} not found`);
       }
@@ -83,7 +83,7 @@ export class OrdersService {
     // get all the product for the order
     const items: GetOrderItems[] = [];
     for (const it of order.items) {
-      const item = await this.itemsService.findOne(it.product_id);
+      const item = await this.productsService.findOne(it.product_id);
 
       if (!item) {
         throw new BadRequestException(`Item not found`);
@@ -132,7 +132,7 @@ export class OrdersService {
 
     // Controlla se ogni prodotto esiste
     for (const item of mergeProducts) {
-      const check = await this.itemsService.findOne(item.product_id);
+      const check = await this.productsService.findOne(item.product_id);
       if (!check) {
         throw new BadRequestException(`Product ${item.product_id} not found`);
       }
@@ -140,5 +140,21 @@ export class OrdersService {
 
     this.ordersDatabase[orderIndex].items = mergeProducts;
     return this.findOne(id);
+  }
+
+  /**
+   * Delete a order by id, return true if delete false otherwise
+   * @param {string} id
+   * @returns {Promise<boolean>}
+   */
+  async delete(id: string): Promise<boolean> {
+    const index = this.ordersDatabase.findIndex((el) => el.order_id === id);
+
+    if (index !== -1) {
+      this.ordersDatabase.splice(index, 1);
+      return true;
+    }
+
+    return false;
   }
 }

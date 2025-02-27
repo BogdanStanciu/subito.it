@@ -13,41 +13,41 @@ export class ProductsService {
   }
 
   /**
-   * Create and return a new item
-   * @param {CreateProductDto} createItemDto
-   * @returns {Promise<Item>}
+   * Create and return a new product
+   * @param {CreateProductDto} createProductDto
+   * @returns {Promise<Product>}
    */
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    const item = {
+    const product = {
       product_id: uuidv4(),
       ...createProductDto,
     };
 
-    this.productsDatabase.push(item);
-    return item;
+    this.productsDatabase.push(product);
+    return product;
   }
 
   /**
-   * Fine a single item by id
+   * Fine a single product by id
    * @param {string} id
-   * @returns {Promise<Item>}
+   * @returns {Promise<Product>}
    */
   async findOne(id: string): Promise<Product | undefined> {
     return this.productsDatabase.find((el) => el.product_id === id);
   }
 
   /**
-   * Return a list of items that match the given name or all the items in the db
+   * Return a list of products that match the given name or all the products in the db
    * @param {string} name
-   * @returns {Promise<Item[]>}
+   * @returns {Promise<Product[]>}
    */
   async find(name: string): Promise<Product[]> {
     const searchPattern = name?.length
       ? new RegExp(name, 'i')
       : new RegExp('.', 'i');
 
-    return this.productsDatabase.filter((item) =>
-      searchPattern.test(item.name),
+    return this.productsDatabase.filter((product) =>
+      searchPattern.test(product.name),
     );
   }
 
@@ -69,7 +69,7 @@ export class ProductsService {
   }
 
   /**
-   * Delete a single item by id
+   * Delete a single product by id
    * @param {string} id
    * @returns {Promise<boolean>}
    */

@@ -6,10 +6,10 @@ import { AppModule } from '../src/app.module';
 import { CreateProductDto } from 'src/products/dto/create-products.dto';
 import { UpdateProductDto } from 'src/products/dto/update-products.dto';
 
-describe('Items Module', () => {
+describe('Products Module', () => {
   let app: INestApplication<App>;
-  let updateItemId: string;
-  let createdItem: any;
+  let updateProductId: string;
+  let createdProduct: any;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -27,8 +27,8 @@ describe('Items Module', () => {
     await app.close();
   });
 
-  it('/item (POST) → create an item', async () => {
-    const newItem: CreateProductDto = {
+  it('/products (POST) → create an product', async () => {
+    const newProduct: CreateProductDto = {
       name: 'Green apple',
       vat: 0.1,
       price: 10,
@@ -36,77 +36,77 @@ describe('Items Module', () => {
     };
 
     const response = await request(app.getHttpServer())
-      .post('/items')
-      .send(newItem)
+      .post('/products')
+      .send(newProduct)
       .expect(201);
 
-    createdItem = response.body;
+    createdProduct = response.body;
 
-    expect(response.body).toMatchObject(newItem);
+    expect(response.body).toMatchObject(newProduct);
     expect(response.body).toHaveProperty('product_id');
   });
 
-  it('/item (GET) → should return a list of items which contain "green" as a substring', async () => {
+  it('/products (GET) → should return a list of products which contain "green" as a substring', async () => {
     const response = await request(app.getHttpServer())
-      .get('/items?name=green')
+      .get('/products?name=green')
       .expect(200);
 
     expect(response.body.legnth).not.toBe(0);
-    updateItemId = response.body[0].product_id;
+    updateProductId = response.body[0].product_id;
   });
 
-  it('/items (GET) → should return a list of items', async () => {
+  it('/products (GET) → should return a list of products', async () => {
     const response = await request(app.getHttpServer())
-      .get('/items')
+      .get('/products')
       .expect(200);
 
     expect(response.body).toBeInstanceOf(Array);
     expect(response.body.length).toBeGreaterThan(0);
   });
 
-  it('/items/:id (GET) → should return a specific item', async () => {
+  it('/products/:id (GET) → should return a specific item', async () => {
     const response = await request(app.getHttpServer())
-      .get(`/items/${createdItem.product_id}`)
+      .get(`/products/${createdProduct.product_id}`)
       .expect(200);
 
-    expect(response.body).toMatchObject(createdItem);
+    expect(response.body).toMatchObject(createdProduct);
   });
 
-  it('/items/:id (GET) → should return 404 if item does not exist', async () => {
+  it('/products/:id (GET) → should return 404 if item does not exist', async () => {
     await request(app.getHttpServer())
-      .get('/items/non-existing-id')
+      .get('/products/non-existing-id')
       .expect(404);
   });
 
-  it('/items/:id (PUT) → should update an existing item', async () => {
+  it('/products/:id (PUT) → should update an existing item', async () => {
     const updateData: UpdateProductDto = { price: 15 };
 
     const response = await request(app.getHttpServer())
-      .put(`/items/${createdItem.product_id}`)
+      .put(`/products/${createdProduct.product_id}`)
       .send(updateData)
-      .expect(200);
+      .expect(201);
 
     expect(response.body.price).toBe(15);
   });
 
-  it('/items/:id (PUT) → should return 400 because of price to low', async () => {
+  it('/products/:id (PUT) → should return 400 because of price to low', async () => {
     const updateData: UpdateProductDto = { price: 0 };
 
     await request(app.getHttpServer())
-      .put(`/items/${createdItem.product_id}`)
+      .put(`/products/${createdProduct.product_id}`)
       .send(updateData)
       .expect(400);
   });
 
-  it('/items/:id (DELETE) → should delete an item', async () => {
+  it('/products/:id (DELETE) → should delete an item', async () => {
     await request(app.getHttpServer())
-      .delete(`/items/${createdItem.product_id}`)
-      .expect(200);
+      .delete(`/products/${createdProduct.product_id}`)
+      .expect(204);
   });
 
-  it('/items/:id (DELETE) → should return 404 if item is already deleted', async () => {
+  it('/products/:id (DELETE) → should return 404 if item is already deleted', async () => {
     await request(app.getHttpServer())
-      .delete(`/items/${createdItem.product_id}`)
+      .delete(`/products/${createdProduct.product_id}`)
       .expect(404);
   });
 });

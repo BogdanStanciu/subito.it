@@ -1,99 +1,205 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Subito.it Purchase Cart Service
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This repository contains a minimal example for a Purchase Cart Service implemented using NestJS
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Overview
 
-## Description
+The application is structured into two main modules:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Product Module**
 
-## Project setup
+  - Manages product data including prices and VAT rates
+  - Stores products in memory
+  - Provides product retrieval by ID
+
+- **Order Module**
+  - Handles order creation and retrieval
+  - Calculates total prices and VAT for orders
+  - Stores orders in memory
+  - Integrates with the Product module to fetch product information
+
+## Technical Decisions
+
+### In-Memory Storage
+
+Instead of using a database, the application implements in-memory repositories for both products and orders in order to simplify the setup process.
+This is suitable for this demonstration (though a real production system would use a persistent database).
+
+The current implementation is oriented to use a non-relational database like MongoDB.
+
+### Price Calculation Strategy
+
+For this demonstration the service calculates prices and VAT at retrieval time rather than storing pre-calculated values.
+This has some pros and cons:
+
+- **Pros**: Always accurate with latest pricing data, handles dynamic pricing well, simpler data model
+- **Cons**: Higher computational load on each fetch, potentially slower response times (this can be resolved partially by introducing a cache layer, but needs a mechanism to determine how often to invalidate the cache)
+
+Another solution could be to pre-calculate and store the VAT and price,
+which would provide faster response times, reduced computational load on fetch operations, and consistent pricing during a session, but requires recalculation when cart changes, with potential for stale data if prices change.
+
+The best approach depends on factors like:
+
+1. How frequently prices change in the system
+2. Performance requirements and expected load
+3. Complexity of tax calculations
+4. User expectations around price consistency
+
+A hybrid can also work well: store calculated totals in the cart but recalculate when:
+
+- Items are added/removed/quantities changed
+- A certain time has elapsed
+- The cart is being prepared for checkout
+
+But it would need a more complex system to handle this approach.
+
+## Installation
+
+Clone this repository on your local machine.
+
+🚨 **Be careful** 🚨
+
+**the project must be launched with docker, using Orbstack could cause problems with the mounting of the project on /mnt.**
+
+**Run chmod on the script files before launching the container**
 
 ```bash
-$ npm install
+chmod +x ./scripts/*
 ```
 
-## Compile and run the project
+Create image:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+docker build -t mytest .
 ```
 
-## Run tests
+Build:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+docker run -v $(pwd):/mnt -p 9090:9090 -w /mnt mytest ./scripts/build.sh
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Test:
 
 ```bash
-$ npm install -g mau
-$ mau deploy
+docker run -v $(pwd):/mnt -p 9090:9090 -w /mnt mytest ./scripts/test.sh
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Run:
 
-## Resources
+```bash
+docker run -v $(pwd):/mnt -p 9090:9090 -w /mnt mytest ./scripts/run.sh
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+## Documentation
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+The API documentation will be available at http://localhost:9090/doc
 
-## Support
+## Testing
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+The application includes comprehensive end-to-end tests that:
 
-## Stay in touch
+- Test the full request/response cycle through HTTP endpoints
+- Verify the integrated behavior of controllers, services, and repositories
+- Confirm order creation with multiple items
+- Verify price and VAT calculations at both item and order levels
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Also include unit tests for `OrdersService` and `ProductsService` to ensure correctness of business logic
 
-## License
+## Data Models
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+The service uses the following data models:
+
+**Product**:
+
+```typescript
+class Product {
+  product_id: string;
+  name: string;
+  price: number;
+  // Vat cost in percent of price
+  vat: number;
+  description?: string;
+}
+```
+
+---
+
+**Order**:
+
+```typescript
+class Order {
+  order_id: string;
+  items: OrderItems[];
+}
+
+class OrderItems {
+  product_id: string;
+  quantity: number;
+}
+```
+
+Reasons:
+
+- Atomic Operations: cart operations (add/remove items) can be done in a single operation
+- Read Performance: you'll typically need to read the entire cart at once
+- Data Consistency: cart items are strongly related to the cart itself
+- Query Simplicity: no need for joins/lookups
+
+---
+
+**Order Response**:
+
+```typescript
+class GetOrder extends Order {
+  order_price: number;
+  order_vat: number;
+  items: GetOrderItems[];
+}
+
+class GetOrderItems extends OrderItems {
+  price: number;
+  vat: number;
+}
+```
+
+## Next Steps
+
+Possible improvements to be made could be the introduction of a database for data storage, like MongoDB.
+Also the current infrastructure would need to be changed to allow communication between the service container and a database.
+A possible solution would be to use docker-compose to orchestrate the service and the database in a network to make them communicate.
+
+A possible docker-compose implementation would be:
+
+```yml
+services:
+  mytest:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: mytest:latest
+    env_file:
+      - ./.env
+    depends_on:
+      - mongodb
+    ports:
+      - 9090:9090
+    restart: always
+    networks:
+      local_network:
+        aliases:
+          - mytest
+
+  mongodb:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    networks:
+      local_network:
+        aliases:
+          - mongo
+
+networks:
+  local_network:
+```

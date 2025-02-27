@@ -74,7 +74,7 @@ describe('Orders Module', () => {
     // Insert products
     for (let i = 0; i < products.length; i++) {
       const response = await request(app.getHttpServer())
-        .post('/items')
+        .post('/products')
         .send(products[i])
         .expect(201);
 
@@ -138,10 +138,16 @@ describe('Orders Module', () => {
     const response = await request(app.getHttpServer())
       .put(`/orders/${order.order_id}`)
       .send(updateOrder)
-      .expect(200);
+      .expect(201);
 
     order = response.body;
     expect(order.order_price).toBe(9.5);
     expect(order.order_vat).toBe(0.95);
+  });
+
+  it('/orders (DELETE) → delete existing order', async () => {
+    const response = await request(app.getHttpServer())
+      .delete(`/orders/${order.order_id}`)
+      .expect(204);
   });
 });
